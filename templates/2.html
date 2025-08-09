@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lex - Your Dental Expert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .clear-chat-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s;
+        }
+
+        .clear-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: #f1f3f5;
+            color: #333;
+            border-bottom-left-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .message a {
+            color: #007bff;
+            text-decoration: underline;
+            transition: color 0.3s;
+        }
+
+        .message a:hover {
+            color: #0056b3;
+        }
+
+        .user-message a {
+            color: #fff;
+        }
+
+        .user-message a:hover {
+            color: #f8f9fa;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-height: 45px;
+            max-height: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 22px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 18px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background: #f1f3f5;
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            padding: 12px 16px;
+            display: none;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 95vh;
+                border-radius: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.5em;
+            }
+            
+            .clear-chat-btn {
+                font-size: 0.7em;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🦷 Lex - Your Dental Expert</h1>
+            <p>Professional dental advice and guidance</p>
+            <button class="clear-chat-btn" onclick="clearChat()">Clear Chat</button>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="chat-messages" id="chatMessages">
+            {% for message in chat_history %}
+                <div class="message {% if message.type == 'user' %}user-message{% else %}bot-message{% endif %}">
+                    {% set message_text = message.message %}
+                    {% if 'https://calendly.com/gcloud1241/30min' in message_text %}
+                        {% set message_text = message_text.replace('Click here to book an appointment: https://calendly.com/gcloud1241/30min', 'Click here to book an appointment: <a href="https://calendly.com/gcloud1241/30min" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">https://calendly.com/gcloud1241/30min</a>') %}
+                        {{ message_text | safe }}
+                    {% else %}
+                        {{ message_text }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chatForm">
+                <textarea 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Ask me about your dental health..." 
+                    rows="1"
+                    required
+                ></textarea>
+                <button type="submit" class="send-btn" id="sendBtn">
+                    ➤
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatForm = document.getElementById('chatForm');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Handle Enter key (send on Enter, new line on Shift+Enter)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Disable input and show loading state
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+            errorMessage.style.display = 'none';
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage(data.bot_response, 'bot');
+                } else {
+                    showError(data.error || 'An error occurred while sending your message.');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                // Re-enable input and hide loading state
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                messageInput.focus();
+                hideTypingIndicator();
+            }
+        });
+
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            // Debug: Log the original text
+            console.log('Original message:', text);
+            
+            // Convert URLs to clickable links
+            let messageWithLinks = text;
+            
+            // First, handle the specific Calendly link pattern
+            if (messageWithLinks.includes('https://calendly.com/gcloud1241/30min')) {
+                console.log('Found Calendly link, converting...');
+                messageWithLinks = messageWithLinks.replace(
+                    /Click here to book an appointment:\s*https:\/\/calendly\.com\/gcloud1241\/30min/g,
+                    'Click here to book an appointment: <a href="https://calendly.com/gcloud1241/30min" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">Book Appointment</a>'
+                );
+            }
+            
+            // Then handle any other standalone URLs
+            const urlRegex = /(?<!href=")(?<!">)(https?:\/\/[^\s<]+)/g;
+            messageWithLinks = messageWithLinks.replace(urlRegex, function(match) {
+                console.log('Converting URL:', match);
+                return '<a href="' + match + '" target="_blank" style="color: #007bff; text-decoration: underline;">' + match + '</a>';
+            });
+            
+            console.log('Final message:', messageWithLinks);
+            
+            messageDiv.innerHTML = messageWithLinks;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatMessages.appendChild(typingIndicator);
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        async function clearChat() {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                try {
+                    const response = await fetch('/clear_chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        showError('Failed to clear chat. Please try again.');
+                    }
+                } catch (error) {
+                    showError('Network error. Please try again.');
+                }
+            }
+        }
+
+        // Focus on input when page loads
+        window.addEventListener('load', function() {
+            messageInput.focus();
+            scrollToBottom();
+        });
+
+        // Auto-scroll to bottom when page loads
+        scrollToBottom();
+    </script>
+</body>
+</html>
