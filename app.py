@@ -153,4 +153,6 @@ def clear_chat():
 
 # Run the app
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Use debug mode from environment variable, default to False for production
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    app.run(debug=debug_mode, host="0.0.0.0", port=5000)
