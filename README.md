@@ -154,9 +154,9 @@ Modify session configuration in `app.py`:
 - Ensure you're using Python 3.8 or higher
 
 **Port Already in Use:**
-- Change the port in `app.py` (line 156) or use an environment variable:
+- Change the port in `app.py` (line 158) or use an environment variable:
   ```python
-  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+  app.run(debug=debug_mode, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
   ```
 
 ## Contributing
